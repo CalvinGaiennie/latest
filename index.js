@@ -1,9 +1,11 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
 require("dotenv").config();
+const cors = require("cors");
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri, {
@@ -40,7 +42,7 @@ async function connectToDb() {
 
 // Basic route to test the API
 app.get("/", (req, res) => {
-  res.json({ message: "Hello MongoDB!" });
+  res.json({ message: "Hello MongoDB!!!!" });
 });
 
 // Add a new route to get all documents
@@ -50,6 +52,25 @@ app.get("/documents", async (req, res) => {
     const collection = database.collection("test_collection");
     const documents = await collection.find({}).toArray();
     res.json(documents);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Serve static files from public directory
+app.use(express.static("public"));
+app.use(cors());
+// Add a new route to create a document
+app.post("/documents", async (req, res) => {
+  try {
+    const database = client.db("test");
+    const collection = database.collection("test_collection");
+    const document = {
+      message: req.body.message,
+      timestamp: new Date(),
+    };
+    await collection.insertOne(document);
+    res.status(201).json(document);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

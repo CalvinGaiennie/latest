@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MongoDB Demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .document {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>MongoDB Documents</h1>
+
+    <form id="addForm">
+      <input type="text" id="message" placeholder="Enter message" />
+      <button type="submit">Add Document</button>
+    </form>
+
+    <div id="documents"></div>
+
+    <script>
+      // Load documents
+      async function loadDocuments() {
+        const response = await fetch("http://localhost:3001/documents");
+        const documents = await response.json();
+        const container = document.getElementById("documents");
+        container.innerHTML = documents
+          .map(
+            (doc) => `
+                <div class="document">
+                    <p>Message: ${doc.message}</p>
+                    <p>Timestamp: ${new Date(
+                      doc.timestamp
+                    ).toLocaleString()}</p>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      // Add new document
+      document
+        .getElementById("addForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const message = document.getElementById("message").value;
+          console.log("Sending message:", message);
+          try {
+            const response = await fetch("http://localhost:3001/documents", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message }),
+            });
+            console.log("Response:", await response.json());
+            document.getElementById("message").value = "";
+            loadDocuments();
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        });
+
+      // Initial load
+      loadDocuments();
+    </script>
+  </body>
+</html>
