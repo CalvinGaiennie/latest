@@ -12,6 +12,17 @@
         padding: 10px;
         margin: 10px 0;
       }
+      .delete-btn {
+        background-color: #ff4444;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .delete-btn:hover {
+        background-color: #cc0000;
+      }
     </style>
   </head>
   <body>
@@ -38,6 +49,9 @@
                     <p>Timestamp: ${new Date(
                       doc.timestamp
                     ).toLocaleString()}</p>
+                    <button onclick="deleteDocument('${
+                      doc._id
+                    }')" class="delete-btn">Delete</button>
                 </div>
             `
           )
@@ -67,6 +81,24 @@
 
       // Initial load
       loadDocuments();
+
+      async function deleteDocument(id) {
+        try {
+          const response = await fetch(
+            `http://localhost:3001/documents/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
+          if (response.ok) {
+            loadDocuments(); // Refresh the list
+          } else {
+            console.error("Failed to delete document");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
     </script>
   </body>
 </html>

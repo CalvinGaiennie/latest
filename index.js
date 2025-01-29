@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
 const cors = require("cors");
 
@@ -71,6 +71,23 @@ app.post("/documents", async (req, res) => {
     };
     await collection.insertOne(document);
     res.status(201).json(document);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add this after your other routes
+app.delete("/documents/:id", async (req, res) => {
+  try {
+    const database = client.db("test");
+    const collection = database.collection("test_collection");
+    const result = await collection.deleteOne({
+      _id: new ObjectId(req.params.id),
+    });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+    res.status(200).json({ message: "Document deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
